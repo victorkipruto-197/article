@@ -1,9 +1,9 @@
 import { CreateUserForm, Log, Role, User } from "./entities";
 export interface SiteDB {
-    createUser(request: CreateUserForm): User;
-    assignRoleToUser(userId: string, role: Role): boolean;
-    getUserById(userId: string): User | undefined;
-    insertLog(log: Log): void;
+    createUser(request: CreateUserForm): Promise<User | null>;
+    assignRoleToUser(userId: string, role: Role): Promise<boolean>;
+    getUserById(userId: string): Promise<User | undefined>;
+    insertLog(log: Log): Promise<void>;
 }
 export interface CCache {
 }

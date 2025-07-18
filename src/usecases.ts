@@ -1,8 +1,9 @@
 import { CError, CreateUserForm, Repository, Role, Status, User } from "./entities";
 import {ADMIN_SUBSCRIPTION_EXPIRED,ADMIN_NOT_FOUND, EMAIL_SUBJECT_ACCOUNT_CREATED, ADMIN_FAILED_ASSIGN_ROLE, ADMIN_ROLE_ASSIGN_SUCCESS, EMAIL_SUBJECT_ROLE_ASSIGNED, USER_NOT_FOUND, ROLE_USER_NOT_AUTHORIZED} from "./constants"
+import { assert } from "console";
 
 
-export const AdminCreateUser = (adminId: string, repository: Repository, user: CreateUserForm): User | CError => {
+export const AdminCreateUser =async (adminId: string, repository: Repository, user: CreateUserForm): Promise<User | CError> => {
     /**
      * Here the organization admin sets the workflow for all articles or 
      * can set for specific article. 
@@ -12,7 +13,7 @@ export const AdminCreateUser = (adminId: string, repository: Repository, user: C
      * 
      */
 
-    const admin: User | undefined = repository.db.getUserById(adminId)
+    const admin: User | undefined = await repository.db.getUserById(adminId)
 
     if (admin == undefined) {
         repository.db.insertLog({
@@ -46,13 +47,14 @@ export const AdminCreateUser = (adminId: string, repository: Repository, user: C
         }
         if (admin.isActive) {
 
-            const createdUser = repository.db.createUser({
+            const createdUser = await repository.db.createUser({
                 firstName: user.firstName,
                 lastName: user.lastName,
                 email: user.email,
                 password: ""
             })
-            repository.db.insertLog({
+            if (createdUser != null){
+                repository.db.insertLog({
                 usecase: "AdminCreateUser",
                 status: Status.SUCCESS,
                 errorCode: 102,
@@ -68,6 +70,13 @@ export const AdminCreateUser = (adminId: string, repository: Repository, user: C
             })
             
             return createdUser
+            }
+            else return {
+                code:198,
+                title:"Fail to create user",
+                description:"Failed to insert user"
+            }
+            
         }
         else {
             repository.db.insertLog({
@@ -87,7 +96,7 @@ export const AdminCreateUser = (adminId: string, repository: Repository, user: C
 
 }
 
-export const AdminAssignUserRole = (adminId: string, userId:string, role:Role, repository:Repository):boolean => {
+export const AdminAssignUserRole = async (adminId: string, userId:string, role:Role, repository:Repository):Promise<boolean> => {
     /**
      * Assigns different roles to users 
      * Its only an admin that can assign a role to a specific user
@@ -95,7 +104,7 @@ export const AdminAssignUserRole = (adminId: string, userId:string, role:Role, r
      * Only predefined roles are included 
      * One User can have multiple roles 
      */
-    const admin = repository.db.getUserById(adminId)
+    const admin = await repository.db.getUserById(adminId)
 
     if (admin == undefined){
         repository.db.insertLog({
@@ -133,7 +142,7 @@ export const AdminAssignUserRole = (adminId: string, userId:string, role:Role, r
         }
         else{
            
-            const user:User|undefined = repository.db.getUserById(userId)
+            const user:User|undefined = await repository.db.getUserById(userId)
             if (user != undefined){
                  repository.db.assignRoleToUser(userId, role)
                     repository.db.insertLog({
