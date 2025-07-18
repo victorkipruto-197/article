@@ -1,8 +1,8 @@
 import { CError, CreateUserForm, Log, Role, User } from "./entities";
 
-export interface AdminDB{
-    getAdminById(id:String):User|undefined
-}
+// export interface AdminDB{
+//     getAdminById(id:String):User|undefined
+// }
 
 export interface SiteDB{
     createUser(request:CreateUserForm):User

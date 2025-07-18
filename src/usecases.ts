@@ -1,5 +1,5 @@
 import { CError, CreateUserForm, Repository, Role, Status, User } from "./entities";
-import {ADMIN_SUBSCRIPTION_EXPIRED,ADMIN_NOT_FOUND, EMAIL_SUBJECT_ACCOUNT_CREATED, ADMIN_FAILED_ASSIGN_ROLE, ADMIN_ROLE_ASSIGN_SUCCESS, EMAIL_SUBJECT_ROLE_ASSIGNED, USER_NOT_FOUND} from "./constants"
+import {ADMIN_SUBSCRIPTION_EXPIRED,ADMIN_NOT_FOUND, EMAIL_SUBJECT_ACCOUNT_CREATED, ADMIN_FAILED_ASSIGN_ROLE, ADMIN_ROLE_ASSIGN_SUCCESS, EMAIL_SUBJECT_ROLE_ASSIGNED, USER_NOT_FOUND, ROLE_USER_NOT_AUTHORIZED} from "./constants"
 
 
 export const AdminCreateUser = (adminId: string, repository: Repository, user: CreateUserForm): User | CError => {
@@ -12,7 +12,7 @@ export const AdminCreateUser = (adminId: string, repository: Repository, user: C
      * 
      */
 
-    const admin: User | undefined = repository.adminDB.getAdminById(adminId)
+    const admin: User | undefined = repository.db.getUserById(adminId)
 
     if (admin == undefined) {
         repository.logs.insertLog({
@@ -29,6 +29,21 @@ export const AdminCreateUser = (adminId: string, repository: Repository, user: C
         }
     }
     else {
+        if(!admin.role.includes(Role.Admin)){
+            repository.logs.insertLog({
+                usecase:"AdminCreateUser",
+                status:Status.FAILED,
+                errorCode:199,
+                description: ROLE_USER_NOT_AUTHORIZED,
+                timestamp:123
+            })
+
+            return {
+                code:199,
+                title:"UnAuthorized",
+                description: ROLE_USER_NOT_AUTHORIZED
+            }
+        }
         if (admin.isActive) {
 
             const createdUser = repository.db.createUser({
@@ -80,7 +95,7 @@ export const AdminAssignUserRole = (adminId: string, userId:string, role:Role, r
      * Only predefined roles are included 
      * One User can have multiple roles 
      */
-    const admin = repository.adminDB.getAdminById(adminId)
+    const admin = repository.db.getUserById(adminId)
 
     if (admin == undefined){
         repository.logs.insertLog({
@@ -94,6 +109,17 @@ export const AdminAssignUserRole = (adminId: string, userId:string, role:Role, r
         return false
         
     }else{
+        if(!admin.role.includes(Role.Admin)){
+            repository.logs.insertLog({
+                usecase:"AdminAssignUserRole",
+                status:Status.FAILED,
+                errorCode:199,
+                description: ROLE_USER_NOT_AUTHORIZED,
+                timestamp:123
+            })
+
+            return false
+        }
         if (admin.isActive){
             repository.logs.insertLog({
                 usecase:"AdminAssignUserRole",
