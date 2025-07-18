@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.USER_NOT_FOUND = exports.EMAIL_SUBJECT_ROLE_ASSIGNED = exports.EMAIL_SUBJECT_ACCOUNT_CREATED = exports.ADMIN_ROLE_ASSIGN_SUCCESS = exports.ADMIN_FAILED_ASSIGN_ROLE = exports.ADMIN_SUBSCRIPTION_EXPIRED = exports.ADMIN_NOT_FOUND = void 0;
+exports.ADMIN_NOT_FOUND = "Admin not found";
+exports.ADMIN_SUBSCRIPTION_EXPIRED = "Admin account suspended";
+exports.ADMIN_FAILED_ASSIGN_ROLE = "Failed to assign specified role to the user";
+exports.ADMIN_ROLE_ASSIGN_SUCCESS = "Successfully added a role to the user";
+exports.EMAIL_SUBJECT_ACCOUNT_CREATED = "Account Created";
+exports.EMAIL_SUBJECT_ROLE_ASSIGNED = "New Role Assigned";
+exports.USER_NOT_FOUND = "Specified user does not exist";

@@ -1,0 +1,17 @@
+import { CError, CreateUserForm, Repository, Role, User } from "./entities";
+export declare const AdminCreateUser: (adminId: string, repository: Repository, user: CreateUserForm) => User | CError;
+export declare const AdminAssignUserRole: (adminId: string, userId: string, role: Role, repository: Repository) => boolean;
+export declare const AdminDeleteUser: (user: User) => void;
+export declare const AdminUpdateUserPackage: (user: User) => void;
+export declare const AdminMakePaymentToSubscription: (user: User) => void;
+export declare const AdminViewAnalytics: (user: User) => void;
+export declare const StaffWriterWritesArticle: (user: User) => void;
+export declare const IllustratorUploadsImagesVideosFiles: (user: User) => void;
+export declare const ColumnistAddsOpinionPieces: (user: User) => void;
+export declare const EditorFactChecksAndSubmitsArticleForPublishing: (user: User) => void;
+export declare const SalesIncludesAdsToBeAttached: (user: User) => void;
+export declare const PageDesignerChecksPageStyles: (user: User) => void;
+export declare const PublisherReleasesDeletesPost: (user: User) => void;
+export declare const SocialMediaShareToSocialMedia: (user: User) => void;
+export declare const SocialMediaReviewComments: (user: User) => void;
+export declare const SocialMediaReplyToComments: (user: User) => void;
