@@ -12,7 +12,7 @@ const AdminCreateUser = (adminId, repository, user) => {
      * At this point concern is not how this admin Id was obtained.
      *
      */
-    const admin = repository.adminDB.getAdminById(adminId);
+    const admin = repository.db.getUserById(adminId);
     if (admin == undefined) {
         repository.logs.insertLog({
             usecase: "AdminCreateUser",
@@ -28,6 +28,20 @@ const AdminCreateUser = (adminId, repository, user) => {
         };
     }
     else {
+        if (!admin.role.includes(entities_1.Role.Admin)) {
+            repository.logs.insertLog({
+                usecase: "AdminCreateUser",
+                status: entities_1.Status.FAILED,
+                errorCode: 199,
+                description: constants_1.ROLE_USER_NOT_AUTHORIZED,
+                timestamp: 123
+            });
+            return {
+                code: 199,
+                title: "UnAuthorized",
+                description: constants_1.ROLE_USER_NOT_AUTHORIZED
+            };
+        }
         if (admin.isActive) {
             const createdUser = repository.db.createUser({
                 firstName: user.firstName,
@@ -74,7 +88,7 @@ const AdminAssignUserRole = (adminId, userId, role, repository) => {
      * Only predefined roles are included
      * One User can have multiple roles
      */
-    const admin = repository.adminDB.getAdminById(adminId);
+    const admin = repository.db.getUserById(adminId);
     if (admin == undefined) {
         repository.logs.insertLog({
             usecase: "AdminAssignUserRole",
@@ -86,6 +100,16 @@ const AdminAssignUserRole = (adminId, userId, role, repository) => {
         return false;
     }
     else {
+        if (!admin.role.includes(entities_1.Role.Admin)) {
+            repository.logs.insertLog({
+                usecase: "AdminAssignUserRole",
+                status: entities_1.Status.FAILED,
+                errorCode: 199,
+                description: constants_1.ROLE_USER_NOT_AUTHORIZED,
+                timestamp: 123
+            });
+            return false;
+        }
         if (admin.isActive) {
             repository.logs.insertLog({
                 usecase: "AdminAssignUserRole",
