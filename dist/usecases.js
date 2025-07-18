@@ -1,9 +1,18 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SocialMediaReplyToComments = exports.SocialMediaReviewComments = exports.SocialMediaShareToSocialMedia = exports.PublisherReleasesDeletesPost = exports.PageDesignerChecksPageStyles = exports.SalesIncludesAdsToBeAttached = exports.EditorFactChecksAndSubmitsArticleForPublishing = exports.ColumnistAddsOpinionPieces = exports.IllustratorUploadsImagesVideosFiles = exports.StaffWriterWritesArticle = exports.AdminViewAnalytics = exports.AdminMakePaymentToSubscription = exports.AdminUpdateUserPackage = exports.AdminDeleteUser = exports.AdminAssignUserRole = exports.AdminCreateUser = void 0;
 const entities_1 = require("./entities");
 const constants_1 = require("./constants");
-const AdminCreateUser = (adminId, repository, user) => {
+const AdminCreateUser = (adminId, repository, user) => __awaiter(void 0, void 0, void 0, function* () {
     /**
      * Here the organization admin sets the workflow for all articles or
      * can set for specific article.
@@ -12,7 +21,7 @@ const AdminCreateUser = (adminId, repository, user) => {
      * At this point concern is not how this admin Id was obtained.
      *
      */
-    const admin = repository.db.getUserById(adminId);
+    const admin = yield repository.db.getUserById(adminId);
     if (admin == undefined) {
         repository.db.insertLog({
             usecase: "AdminCreateUser",
@@ -43,26 +52,34 @@ const AdminCreateUser = (adminId, repository, user) => {
             };
         }
         if (admin.isActive) {
-            const createdUser = repository.db.createUser({
+            const createdUser = yield repository.db.createUser({
                 firstName: user.firstName,
                 lastName: user.lastName,
                 email: user.email,
                 password: ""
             });
-            repository.db.insertLog({
-                usecase: "AdminCreateUser",
-                status: entities_1.Status.SUCCESS,
-                errorCode: 102,
-                description: `User:${createdUser.email} Role: ${createdUser.role}created successfully`,
-                timestamp: 123
-            });
-            repository.email.sendEmail(createdUser.email, {
-                subject: constants_1.EMAIL_SUBJECT_ACCOUNT_CREATED,
-                cc: [admin.email],
-                message: `Dear ${createdUser.firstName.toUpperCase()}\n, Your account has been created successfully, click the link below to sign in`,
-                signoff: "Admin"
-            });
-            return createdUser;
+            if (createdUser != null) {
+                repository.db.insertLog({
+                    usecase: "AdminCreateUser",
+                    status: entities_1.Status.SUCCESS,
+                    errorCode: 102,
+                    description: `User:${createdUser.email} Role: ${createdUser.role}created successfully`,
+                    timestamp: 123
+                });
+                repository.email.sendEmail(createdUser.email, {
+                    subject: constants_1.EMAIL_SUBJECT_ACCOUNT_CREATED,
+                    cc: [admin.email],
+                    message: `Dear ${createdUser.firstName.toUpperCase()}\n, Your account has been created successfully, click the link below to sign in`,
+                    signoff: "Admin"
+                });
+                return createdUser;
+            }
+            else
+                return {
+                    code: 198,
+                    title: "Fail to create user",
+                    description: "Failed to insert user"
+                };
         }
         else {
             repository.db.insertLog({
@@ -78,9 +95,9 @@ const AdminCreateUser = (adminId, repository, user) => {
             };
         }
     }
-};
+});
 exports.AdminCreateUser = AdminCreateUser;
-const AdminAssignUserRole = (adminId, userId, role, repository) => {
+const AdminAssignUserRole = (adminId, userId, role, repository) => __awaiter(void 0, void 0, void 0, function* () {
     /**
      * Assigns different roles to users
      * Its only an admin that can assign a role to a specific user
@@ -88,7 +105,7 @@ const AdminAssignUserRole = (adminId, userId, role, repository) => {
      * Only predefined roles are included
      * One User can have multiple roles
      */
-    const admin = repository.db.getUserById(adminId);
+    const admin = yield repository.db.getUserById(adminId);
     if (admin == undefined) {
         repository.db.insertLog({
             usecase: "AdminAssignUserRole",
@@ -121,7 +138,7 @@ const AdminAssignUserRole = (adminId, userId, role, repository) => {
             return false;
         }
         else {
-            const user = repository.db.getUserById(userId);
+            const user = yield repository.db.getUserById(userId);
             if (user != undefined) {
                 repository.db.assignRoleToUser(userId, role);
                 repository.db.insertLog({
@@ -156,7 +173,7 @@ const AdminAssignUserRole = (adminId, userId, role, repository) => {
             }
         }
     }
-};
+});
 exports.AdminAssignUserRole = AdminAssignUserRole;
 const AdminDeleteUser = (user) => {
     /**
