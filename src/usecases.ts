@@ -15,7 +15,7 @@ export const AdminCreateUser = (adminId: string, repository: Repository, user: C
     const admin: User | undefined = repository.db.getUserById(adminId)
 
     if (admin == undefined) {
-        repository.logs.insertLog({
+        repository.db.insertLog({
             usecase: "AdminCreateUser",
             status: Status.FAILED,
             errorCode: 100,
@@ -30,7 +30,7 @@ export const AdminCreateUser = (adminId: string, repository: Repository, user: C
     }
     else {
         if(!admin.role.includes(Role.Admin)){
-            repository.logs.insertLog({
+            repository.db.insertLog({
                 usecase:"AdminCreateUser",
                 status:Status.FAILED,
                 errorCode:199,
@@ -52,7 +52,7 @@ export const AdminCreateUser = (adminId: string, repository: Repository, user: C
                 email: user.email,
                 password: ""
             })
-            repository.logs.insertLog({
+            repository.db.insertLog({
                 usecase: "AdminCreateUser",
                 status: Status.SUCCESS,
                 errorCode: 102,
@@ -70,7 +70,7 @@ export const AdminCreateUser = (adminId: string, repository: Repository, user: C
             return createdUser
         }
         else {
-            repository.logs.insertLog({
+            repository.db.insertLog({
                 usecase: "AdminCreateUser",
                 status: Status.FAILED,
                 errorCode: 101,
@@ -98,7 +98,7 @@ export const AdminAssignUserRole = (adminId: string, userId:string, role:Role, r
     const admin = repository.db.getUserById(adminId)
 
     if (admin == undefined){
-        repository.logs.insertLog({
+        repository.db.insertLog({
             usecase:"AdminAssignUserRole",
             status: Status.FAILED,
             errorCode: 102, 
@@ -110,7 +110,7 @@ export const AdminAssignUserRole = (adminId: string, userId:string, role:Role, r
         
     }else{
         if(!admin.role.includes(Role.Admin)){
-            repository.logs.insertLog({
+            repository.db.insertLog({
                 usecase:"AdminAssignUserRole",
                 status:Status.FAILED,
                 errorCode:199,
@@ -121,7 +121,7 @@ export const AdminAssignUserRole = (adminId: string, userId:string, role:Role, r
             return false
         }
         if (admin.isActive){
-            repository.logs.insertLog({
+            repository.db.insertLog({
                 usecase:"AdminAssignUserRole",
                 status:Status.FAILED,
                 errorCode:103,
@@ -136,7 +136,7 @@ export const AdminAssignUserRole = (adminId: string, userId:string, role:Role, r
             const user:User|undefined = repository.db.getUserById(userId)
             if (user != undefined){
                  repository.db.assignRoleToUser(userId, role)
-                    repository.logs.insertLog({
+                    repository.db.insertLog({
                         usecase:"AdminAssignUserRole",
                         status:Status.SUCCESS,
                         errorCode:104,
@@ -153,7 +153,7 @@ export const AdminAssignUserRole = (adminId: string, userId:string, role:Role, r
                 return true
 
             }else{
-                repository.logs.insertLog({
+                repository.db.insertLog({
                     usecase:"AdminAssignUserRole",
                     status:Status.FAILED,
                     errorCode:105,

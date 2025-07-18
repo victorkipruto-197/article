@@ -1,5 +1,5 @@
 import { Email } from "./drivers"
-import { CCache, LogsDB, SiteDB } from "./repositories"
+import { CCache, SiteDB } from "./repositories"
 
 export enum Role {
     Admin="admin",
@@ -125,7 +125,6 @@ export interface CError{
 export interface Repository{
     cache?: CCache
     db: SiteDB
-    logs:LogsDB
     email:Email
 }
 
