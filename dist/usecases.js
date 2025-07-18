@@ -14,7 +14,7 @@ const AdminCreateUser = (adminId, repository, user) => {
      */
     const admin = repository.db.getUserById(adminId);
     if (admin == undefined) {
-        repository.logs.insertLog({
+        repository.db.insertLog({
             usecase: "AdminCreateUser",
             status: entities_1.Status.FAILED,
             errorCode: 100,
@@ -29,7 +29,7 @@ const AdminCreateUser = (adminId, repository, user) => {
     }
     else {
         if (!admin.role.includes(entities_1.Role.Admin)) {
-            repository.logs.insertLog({
+            repository.db.insertLog({
                 usecase: "AdminCreateUser",
                 status: entities_1.Status.FAILED,
                 errorCode: 199,
@@ -49,7 +49,7 @@ const AdminCreateUser = (adminId, repository, user) => {
                 email: user.email,
                 password: ""
             });
-            repository.logs.insertLog({
+            repository.db.insertLog({
                 usecase: "AdminCreateUser",
                 status: entities_1.Status.SUCCESS,
                 errorCode: 102,
@@ -65,7 +65,7 @@ const AdminCreateUser = (adminId, repository, user) => {
             return createdUser;
         }
         else {
-            repository.logs.insertLog({
+            repository.db.insertLog({
                 usecase: "AdminCreateUser",
                 status: entities_1.Status.FAILED,
                 errorCode: 101,
@@ -90,7 +90,7 @@ const AdminAssignUserRole = (adminId, userId, role, repository) => {
      */
     const admin = repository.db.getUserById(adminId);
     if (admin == undefined) {
-        repository.logs.insertLog({
+        repository.db.insertLog({
             usecase: "AdminAssignUserRole",
             status: entities_1.Status.FAILED,
             errorCode: 102,
@@ -101,7 +101,7 @@ const AdminAssignUserRole = (adminId, userId, role, repository) => {
     }
     else {
         if (!admin.role.includes(entities_1.Role.Admin)) {
-            repository.logs.insertLog({
+            repository.db.insertLog({
                 usecase: "AdminAssignUserRole",
                 status: entities_1.Status.FAILED,
                 errorCode: 199,
@@ -111,7 +111,7 @@ const AdminAssignUserRole = (adminId, userId, role, repository) => {
             return false;
         }
         if (admin.isActive) {
-            repository.logs.insertLog({
+            repository.db.insertLog({
                 usecase: "AdminAssignUserRole",
                 status: entities_1.Status.FAILED,
                 errorCode: 103,
@@ -124,7 +124,7 @@ const AdminAssignUserRole = (adminId, userId, role, repository) => {
             const user = repository.db.getUserById(userId);
             if (user != undefined) {
                 repository.db.assignRoleToUser(userId, role);
-                repository.logs.insertLog({
+                repository.db.insertLog({
                     usecase: "AdminAssignUserRole",
                     status: entities_1.Status.SUCCESS,
                     errorCode: 104,
@@ -140,7 +140,7 @@ const AdminAssignUserRole = (adminId, userId, role, repository) => {
                 return true;
             }
             else {
-                repository.logs.insertLog({
+                repository.db.insertLog({
                     usecase: "AdminAssignUserRole",
                     status: entities_1.Status.FAILED,
                     errorCode: 105,
