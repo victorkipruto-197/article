@@ -95,7 +95,9 @@ export const AdminCreateUser =async (adminId: string, repository: Repository, us
     }
 
 }
-
+export const PopulateDBWithRoles = async (repository:Repository):Promise<boolean>=>{
+    return repository.db.populateUserRoles()
+}
 export const AdminAssignUserRole = async (adminId: string, userId:string, role:Role, repository:Repository):Promise<boolean> => {
     /**
      * Assigns different roles to users 
