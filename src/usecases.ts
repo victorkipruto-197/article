@@ -129,7 +129,7 @@ export const AdminAssignUserRole = async (adminId: string, userId:string, role:R
 
             return false
         }
-        if (admin.isActive){
+        if (!admin.isActive){
             repository.db.insertLog({
                 usecase:"AdminAssignUserRole",
                 status:Status.FAILED,
