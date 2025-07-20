@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SocialMediaReplyToComments = exports.SocialMediaReviewComments = exports.SocialMediaShareToSocialMedia = exports.PublisherReleasesDeletesPost = exports.PageDesignerChecksPageStyles = exports.SalesIncludesAdsToBeAttached = exports.EditorFactChecksAndSubmitsArticleForPublishing = exports.ColumnistAddsOpinionPieces = exports.IllustratorUploadsImagesVideosFiles = exports.StaffWriterWritesArticle = exports.AdminViewAnalytics = exports.AdminMakePaymentToSubscription = exports.AdminUpdateUserPackage = exports.AdminDeleteUser = exports.AdminAssignUserRole = exports.AdminCreateUser = void 0;
+exports.SocialMediaReplyToComments = exports.SocialMediaReviewComments = exports.SocialMediaShareToSocialMedia = exports.PublisherReleasesDeletesPost = exports.PageDesignerChecksPageStyles = exports.SalesIncludesAdsToBeAttached = exports.EditorFactChecksAndSubmitsArticleForPublishing = exports.ColumnistAddsOpinionPieces = exports.IllustratorUploadsImagesVideosFiles = exports.StaffWriterWritesArticle = exports.AdminViewAnalytics = exports.AdminMakePaymentToSubscription = exports.AdminUpdateUserPackage = exports.AdminDeleteUser = exports.AdminAssignUserRole = exports.PopulateDBWithRoles = exports.AdminCreateUser = void 0;
 const entities_1 = require("./entities");
 const constants_1 = require("./constants");
 const AdminCreateUser = (adminId, repository, user) => __awaiter(void 0, void 0, void 0, function* () {
@@ -97,6 +97,10 @@ const AdminCreateUser = (adminId, repository, user) => __awaiter(void 0, void 0,
     }
 });
 exports.AdminCreateUser = AdminCreateUser;
+const PopulateDBWithRoles = (repository) => __awaiter(void 0, void 0, void 0, function* () {
+    return repository.db.populateUserRoles();
+});
+exports.PopulateDBWithRoles = PopulateDBWithRoles;
 const AdminAssignUserRole = (adminId, userId, role, repository) => __awaiter(void 0, void 0, void 0, function* () {
     /**
      * Assigns different roles to users
