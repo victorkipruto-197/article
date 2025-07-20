@@ -127,7 +127,7 @@ const AdminAssignUserRole = (adminId, userId, role, repository) => __awaiter(voi
             });
             return false;
         }
-        if (admin.isActive) {
+        if (!admin.isActive) {
             repository.db.insertLog({
                 usecase: "AdminAssignUserRole",
                 status: entities_1.Status.FAILED,
