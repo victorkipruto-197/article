@@ -10,6 +10,12 @@ export interface SiteDB{
     assignRoleToUser(userId:string, role:Role):Promise<boolean>
     getUserById(userId:string):Promise<User|undefined>
     insertLog(log:Log):Promise<void>
+
+    getRoleById(role:Role):Promise<number|undefined>
+    getUserRoles(userId:string):Promise<Role[]>
+    removeUserRole(userId:string, role:Role):Promise<boolean>
+    checkUserHasRole(userId:string, roles:Role):Promise<boolean>
+
 }
 
 
