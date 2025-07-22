@@ -1,4 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-// export const CheckIfAdminExists=(admin:User|undefined):boolean=>{
-// }
+exports.currentTimestamp = void 0;
+const currentTimestamp = () => Date.now();
+exports.currentTimestamp = currentTimestamp;
