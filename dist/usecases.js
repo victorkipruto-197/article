@@ -9,9 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SocialMediaReplyToComments = exports.SocialMediaReviewComments = exports.SocialMediaShareToSocialMedia = exports.PublisherReleasesDeletesPost = exports.PageDesignerChecksPageStyles = exports.SalesIncludesAdsToBeAttached = exports.EditorFactChecksAndSubmitsArticleForPublishing = exports.ColumnistAddsOpinionPieces = exports.IllustratorUploadsImagesVideosFiles = exports.StaffWriterWritesArticle = exports.AdminViewAnalytics = exports.AdminMakePaymentToSubscription = exports.AdminUpdateUserPackage = exports.AdminDeleteUser = exports.AdminAssignUserRole = exports.PopulateDBWithRoles = exports.AdminCreateUser = void 0;
+exports.SocialMediaReplyToComments = exports.SocialMediaReviewComments = exports.SocialMediaShareToSocialMedia = exports.PublisherReleasesDeletesPost = exports.PageDesignerChecksPageStyles = exports.SalesIncludesAdsToBeAttached = exports.EditorFactChecksAndSubmitsArticleForPublishing = exports.ColumnistAddsOpinionPieces = exports.IllustratorUploadsImagesVideosFiles = exports.StaffWriterWritesArticle = exports.AdminViewAnalytics = exports.AdminMakePaymentToSubscription = exports.AdminUpdateUserPackage = exports.AdminDeleteUser = exports.AdminAssignUserRole = exports.GetUserRolesUseCase = exports.CheckUserHasRoleUseCase = exports.RemoveUserRoleUseCase = exports.GetRoleByIdUseCase = exports.PopulateDBWithRoles = exports.AdminCreateUser = void 0;
 const entities_1 = require("./entities");
 const constants_1 = require("./constants");
+const utils_1 = require("./utils");
 const AdminCreateUser = (adminId, repository, user) => __awaiter(void 0, void 0, void 0, function* () {
     /**
      * Here the organization admin sets the workflow for all articles or
@@ -28,7 +29,7 @@ const AdminCreateUser = (adminId, repository, user) => __awaiter(void 0, void 0,
             status: entities_1.Status.FAILED,
             errorCode: 100,
             description: constants_1.ADMIN_NOT_FOUND,
-            timestamp: 123
+            timestamp: (0, utils_1.currentTimestamp)()
         });
         return {
             code: 100,
@@ -43,7 +44,7 @@ const AdminCreateUser = (adminId, repository, user) => __awaiter(void 0, void 0,
                 status: entities_1.Status.FAILED,
                 errorCode: 199,
                 description: constants_1.ROLE_USER_NOT_AUTHORIZED,
-                timestamp: 123
+                timestamp: (0, utils_1.currentTimestamp)()
             });
             return {
                 code: 199,
@@ -64,7 +65,7 @@ const AdminCreateUser = (adminId, repository, user) => __awaiter(void 0, void 0,
                     status: entities_1.Status.SUCCESS,
                     errorCode: 102,
                     description: `User:${createdUser.email} Role: ${createdUser.role}created successfully`,
-                    timestamp: 123
+                    timestamp: (0, utils_1.currentTimestamp)()
                 });
                 repository.email.sendEmail(createdUser.email, {
                     subject: constants_1.EMAIL_SUBJECT_ACCOUNT_CREATED,
@@ -87,7 +88,7 @@ const AdminCreateUser = (adminId, repository, user) => __awaiter(void 0, void 0,
                 status: entities_1.Status.FAILED,
                 errorCode: 101,
                 description: constants_1.ADMIN_SUBSCRIPTION_EXPIRED,
-                timestamp: 123
+                timestamp: (0, utils_1.currentTimestamp)()
             });
             return {
                 code: 101,
@@ -101,6 +102,145 @@ const PopulateDBWithRoles = (repository) => __awaiter(void 0, void 0, void 0, fu
     return repository.db.populateUserRoles();
 });
 exports.PopulateDBWithRoles = PopulateDBWithRoles;
+const GetRoleByIdUseCase = (repository, role) => __awaiter(void 0, void 0, void 0, function* () {
+    const response = yield repository.db.getRoleById(role);
+    if (response == undefined) {
+        repository.db.insertLog({
+            usecase: "GetRoleByIdUseCase",
+            status: entities_1.Status.FAILED,
+            errorCode: 110,
+            description: `Specified role ${role} does not exist`,
+            timestamp: (0, utils_1.currentTimestamp)()
+        });
+        return undefined;
+    }
+    else {
+        repository.db.insertLog({
+            usecase: "GetRoleByIdUseCase",
+            status: entities_1.Status.SUCCESS,
+            errorCode: 111,
+            description: `GET:${role}`,
+            timestamp: (0, utils_1.currentTimestamp)()
+        });
+        return response;
+    }
+});
+exports.GetRoleByIdUseCase = GetRoleByIdUseCase;
+const RemoveUserRoleUseCase = (repository, userId, role) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield repository.db.getUserById(userId);
+    if (user === undefined) {
+        repository.db.insertLog({
+            usecase: "RemoveUserRoleUseCase",
+            status: entities_1.Status.FAILED,
+            errorCode: 114,
+            description: `User not found ${userId}`,
+            timestamp: (0, utils_1.currentTimestamp)()
+        });
+        return false;
+    }
+    else {
+        const userHasRole = yield repository.db.checkUserHasRole(userId, role);
+        if (userHasRole) {
+            const removeStatus = yield repository.db.removeUserRole(userId, role);
+            if (removeStatus) {
+                repository.db.insertLog({
+                    usecase: "RemoveUserRoleUseCase",
+                    status: entities_1.Status.SUCCESS,
+                    description: `Role ${role} successfully removed for user ${userId}`,
+                    timestamp: (0, utils_1.currentTimestamp)()
+                });
+                return removeStatus;
+            }
+            else {
+                repository.db.insertLog({
+                    usecase: "RemoveUserRoleUseCase",
+                    status: entities_1.Status.FAILED,
+                    description: `Failed to remove role ${role} for user ${user}`,
+                    timestamp: (0, utils_1.currentTimestamp)()
+                });
+                repository.email.sendEmail("admin@quwemo.com", {
+                    subject: "Error in removing user role",
+                    cc: ["siteadmins@quwemo.com"],
+                    message: `Dear Admin\n Failed to remove role ${role} for user ${user}`,
+                    signoff: "Admin"
+                });
+                return false;
+            }
+        }
+        else {
+            repository.db.insertLog({
+                usecase: "RemoveUserRoleUseCase",
+                status: entities_1.Status.FAILED,
+                description: `User ${user} does not have role ${role}`,
+                timestamp: (0, utils_1.currentTimestamp)()
+            });
+            return false;
+        }
+    }
+});
+exports.RemoveUserRoleUseCase = RemoveUserRoleUseCase;
+const CheckUserHasRoleUseCase = (repository, userId, role) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield repository.db.getUserById(userId);
+    if (user === undefined) {
+        repository.db.insertLog({
+            usecase: "CheckUserHasRoleUseCase",
+            status: entities_1.Status.FAILED,
+            errorCode: 115,
+            description: `User not found ${userId}`,
+            timestamp: (0, utils_1.currentTimestamp)()
+        });
+        return false;
+    }
+    else {
+        const userRoles = yield repository.db.getUserRoles(userId);
+        if (userRoles.includes(role)) {
+            repository.db.insertLog({
+                usecase: "CheckUserHasRoleUseCase",
+                status: entities_1.Status.SUCCESS,
+                errorCode: 116,
+                description: `User ${user} has a role ${role}`,
+                timestamp: (0, utils_1.currentTimestamp)()
+            });
+            return true;
+        }
+        else {
+            repository.db.insertLog({
+                usecase: "CheckUserHasRoleUseCase",
+                status: entities_1.Status.FAILED,
+                errorCode: 116,
+                description: `User ${user} has a no role ${role}`,
+                timestamp: (0, utils_1.currentTimestamp)()
+            });
+            return false;
+        }
+    }
+});
+exports.CheckUserHasRoleUseCase = CheckUserHasRoleUseCase;
+const GetUserRolesUseCase = (repository, userId) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield repository.db.getUserById(userId);
+    if (user === undefined) {
+        repository.db.insertLog({
+            usecase: "GetUserRolesUseCase",
+            status: entities_1.Status.FAILED,
+            errorCode: 112,
+            description: `GET:${userId}`,
+            timestamp: (0, utils_1.currentTimestamp)()
+        });
+        return [];
+    }
+    else {
+        const roles = repository.db.getUserRoles(userId);
+        repository.db.insertLog({
+            usecase: "GetUserRolesUseCase",
+            status: entities_1.Status.SUCCESS,
+            errorCode: 113,
+            description: `USER: ${userId}; ROLES: ${roles}`,
+            timestamp: (0, utils_1.currentTimestamp)()
+        });
+        return roles;
+    }
+});
+exports.GetUserRolesUseCase = GetUserRolesUseCase;
 const AdminAssignUserRole = (adminId, userId, role, repository) => __awaiter(void 0, void 0, void 0, function* () {
     /**
      * Assigns different roles to users
@@ -127,7 +267,7 @@ const AdminAssignUserRole = (adminId, userId, role, repository) => __awaiter(voi
                 status: entities_1.Status.FAILED,
                 errorCode: 199,
                 description: constants_1.ROLE_USER_NOT_AUTHORIZED,
-                timestamp: 123
+                timestamp: (0, utils_1.currentTimestamp)()
             });
             return false;
         }
@@ -137,7 +277,7 @@ const AdminAssignUserRole = (adminId, userId, role, repository) => __awaiter(voi
                 status: entities_1.Status.FAILED,
                 errorCode: 103,
                 description: constants_1.ADMIN_SUBSCRIPTION_EXPIRED,
-                timestamp: 123
+                timestamp: (0, utils_1.currentTimestamp)()
             });
             return false;
         }
@@ -150,7 +290,7 @@ const AdminAssignUserRole = (adminId, userId, role, repository) => __awaiter(voi
                     status: entities_1.Status.SUCCESS,
                     errorCode: 104,
                     description: constants_1.ADMIN_ROLE_ASSIGN_SUCCESS,
-                    timestamp: 1324
+                    timestamp: (0, utils_1.currentTimestamp)()
                 });
                 repository.email.sendEmail(user.email, {
                     subject: constants_1.EMAIL_SUBJECT_ROLE_ASSIGNED,
@@ -166,7 +306,7 @@ const AdminAssignUserRole = (adminId, userId, role, repository) => __awaiter(voi
                     status: entities_1.Status.FAILED,
                     errorCode: 105,
                     description: constants_1.USER_NOT_FOUND,
-                    timestamp: 1234
+                    timestamp: (0, utils_1.currentTimestamp)()
                 });
                 repository.email.sendEmail(admin.email, {
                     subject: constants_1.EMAIL_SUBJECT_ROLE_ASSIGNED,
