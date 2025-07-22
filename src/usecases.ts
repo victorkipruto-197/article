@@ -265,7 +265,8 @@ export const AdminAssignUserRole = async (adminId: string, userId: string, role:
         return false
 
     } else {
-        if (!admin.role.includes(Role.Admin)) {
+        const adminRoles = await repository.db.getUserRoles(adminId)
+        if (!adminRoles.includes(Role.Admin)) {
             repository.db.insertLog({
                 usecase: "AdminAssignUserRole",
                 status: Status.FAILED,
