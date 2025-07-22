@@ -261,7 +261,8 @@ const AdminAssignUserRole = (adminId, userId, role, repository) => __awaiter(voi
         return false;
     }
     else {
-        if (!admin.role.includes(entities_1.Role.Admin)) {
+        const adminRoles = yield repository.db.getUserRoles(adminId);
+        if (!adminRoles.includes(entities_1.Role.Admin)) {
             repository.db.insertLog({
                 usecase: "AdminAssignUserRole",
                 status: entities_1.Status.FAILED,
