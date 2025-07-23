@@ -2,7 +2,7 @@ import { CError, CreateUserForm, Repository, Role, User } from "./entities";
 export declare const AdminCreateUser: (adminId: string, repository: Repository, user: CreateUserForm) => Promise<User | CError>;
 export declare const PopulateDBWithRoles: (repository: Repository) => Promise<boolean>;
 export declare const GetRoleByIdUseCase: (repository: Repository, role: Role) => Promise<number | undefined>;
-export declare const RemoveUserRoleUseCase: (repository: Repository, userId: string, role: Role) => Promise<boolean>;
+export declare const AdminRemoveUserRoleUseCase: (repository: Repository, adminId: string, userId: string, role: Role) => Promise<boolean>;
 export declare const CheckUserHasRoleUseCase: (repository: Repository, userId: string, role: Role) => Promise<boolean>;
 export declare const GetUserRolesUseCase: (repository: Repository, userId: string) => Promise<Role[]>;
 export declare const AdminAssignUserRole: (adminId: string, userId: string, role: Role, repository: Repository) => Promise<boolean>;

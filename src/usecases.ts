@@ -1,6 +1,6 @@
 import { CError, CreateUserForm, Repository, Role, Status, User } from "./entities";
 import { ADMIN_SUBSCRIPTION_EXPIRED, ADMIN_NOT_FOUND, EMAIL_SUBJECT_ACCOUNT_CREATED, ADMIN_FAILED_ASSIGN_ROLE, ADMIN_ROLE_ASSIGN_SUCCESS, EMAIL_SUBJECT_ROLE_ASSIGNED, USER_NOT_FOUND, ROLE_USER_NOT_AUTHORIZED } from "./constants"
-import { assert } from "console";
+
 import { currentTimestamp } from "./utils";
 
 
@@ -125,7 +125,46 @@ export const GetRoleByIdUseCase = async (repository: Repository, role: Role): Pr
     }
 }
 
-export const RemoveUserRoleUseCase = async (repository: Repository, userId: string, role: Role): Promise<boolean> => {
+export const AdminRemoveUserRoleUseCase = async (repository: Repository, adminId: string, userId: string, role: Role): Promise<boolean> => {
+
+    const admin = await repository.db.getUserById(adminId)
+    if (admin == undefined) {
+        repository.db.insertLog({
+            usecase: "AdminRemoveUserRoleUseCase",
+            status: Status.FAILED,
+            errorCode: 102,
+            description: ADMIN_NOT_FOUND,
+            timestamp: currentTimestamp()
+        })
+
+        return false
+    }
+    else {
+
+        const roles = await repository.db.getUserRoles(adminId)
+        if (!roles.includes(Role.Admin)) {
+            repository.db.insertLog({
+                usecase: "AdminRemoveUserRoleUseCase",
+                status: Status.FAILED,
+                errorCode: 102,
+                description: ROLE_USER_NOT_AUTHORIZED,
+                timestamp: currentTimestamp()
+            })
+
+            return false
+        }
+        if (!admin.isActive) {
+            repository.db.insertLog({
+                usecase: "AdminRemoveUserRoleUseCase",
+                status: Status.FAILED,
+                errorCode: 102,
+                description: ADMIN_SUBSCRIPTION_EXPIRED,
+                timestamp: currentTimestamp()
+            })
+            return false
+        }
+    }
+
     const user = await repository.db.getUserById(userId)
 
     if (user === undefined) {
@@ -138,10 +177,14 @@ export const RemoveUserRoleUseCase = async (repository: Repository, userId: stri
         })
 
         return false
-    } else {
+    }
+
+    else {
         const userHasRole = await repository.db.checkUserHasRole(userId, role)
+
         if (userHasRole) {
-            const removeStatus = await repository.db.removeUserRole(userId, role)
+            const roleId = await repository.db.getRoleById(role)
+            const removeStatus = await repository.db.removeUserRole(userId, roleId!)
             if (removeStatus) {
                 repository.db.insertLog({
                     usecase: "RemoveUserRoleUseCase",
@@ -182,9 +225,9 @@ export const RemoveUserRoleUseCase = async (repository: Repository, userId: stri
     }
 }
 
-export const CheckUserHasRoleUseCase=async(repository:Repository, userId:string, role:Role):Promise<boolean>=>{
+export const CheckUserHasRoleUseCase = async (repository: Repository, userId: string, role: Role): Promise<boolean> => {
     const user = await repository.db.getUserById(userId)
-     if (user === undefined) {
+    if (user === undefined) {
         repository.db.insertLog({
             usecase: "CheckUserHasRoleUseCase",
             status: Status.FAILED,
@@ -196,25 +239,25 @@ export const CheckUserHasRoleUseCase=async(repository:Repository, userId:string,
         return false
     } else {
         const userRoles = await repository.db.getUserRoles(userId)
-        if (userRoles.includes(role)){
+        if (userRoles.includes(role)) {
             repository.db.insertLog({
-            usecase: "CheckUserHasRoleUseCase",
-            status: Status.SUCCESS,
-            errorCode: 116,
-            description: `User ${user} has a role ${role}`,
-            timestamp: currentTimestamp()
+                usecase: "CheckUserHasRoleUseCase",
+                status: Status.SUCCESS,
+                errorCode: 116,
+                description: `User ${user} has a role ${role}`,
+                timestamp: currentTimestamp()
             })
 
             return true
-        }else{
+        } else {
             repository.db.insertLog({
-            usecase: "CheckUserHasRoleUseCase",
-            status: Status.FAILED,
-            errorCode: 116,
-            description: `User ${user} has a no role ${role}`,
-            timestamp: currentTimestamp()
+                usecase: "CheckUserHasRoleUseCase",
+                status: Status.FAILED,
+                errorCode: 116,
+                description: `User ${user} has a no role ${role}`,
+                timestamp: currentTimestamp()
             })
-            return false 
+            return false
         }
     }
 }
@@ -291,6 +334,7 @@ export const AdminAssignUserRole = async (adminId: string, userId: string, role:
         else {
 
             const user: User | undefined = await repository.db.getUserById(userId)
+
             if (user != undefined) {
                 repository.db.assignRoleToUser(userId, role)
                 repository.db.insertLog({

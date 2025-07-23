@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SocialMediaReplyToComments = exports.SocialMediaReviewComments = exports.SocialMediaShareToSocialMedia = exports.PublisherReleasesDeletesPost = exports.PageDesignerChecksPageStyles = exports.SalesIncludesAdsToBeAttached = exports.EditorFactChecksAndSubmitsArticleForPublishing = exports.ColumnistAddsOpinionPieces = exports.IllustratorUploadsImagesVideosFiles = exports.StaffWriterWritesArticle = exports.AdminViewAnalytics = exports.AdminMakePaymentToSubscription = exports.AdminUpdateUserPackage = exports.AdminDeleteUser = exports.AdminAssignUserRole = exports.GetUserRolesUseCase = exports.CheckUserHasRoleUseCase = exports.RemoveUserRoleUseCase = exports.GetRoleByIdUseCase = exports.PopulateDBWithRoles = exports.AdminCreateUser = void 0;
+exports.SocialMediaReplyToComments = exports.SocialMediaReviewComments = exports.SocialMediaShareToSocialMedia = exports.PublisherReleasesDeletesPost = exports.PageDesignerChecksPageStyles = exports.SalesIncludesAdsToBeAttached = exports.EditorFactChecksAndSubmitsArticleForPublishing = exports.ColumnistAddsOpinionPieces = exports.IllustratorUploadsImagesVideosFiles = exports.StaffWriterWritesArticle = exports.AdminViewAnalytics = exports.AdminMakePaymentToSubscription = exports.AdminUpdateUserPackage = exports.AdminDeleteUser = exports.AdminAssignUserRole = exports.GetUserRolesUseCase = exports.CheckUserHasRoleUseCase = exports.AdminRemoveUserRoleUseCase = exports.GetRoleByIdUseCase = exports.PopulateDBWithRoles = exports.AdminCreateUser = void 0;
 const entities_1 = require("./entities");
 const constants_1 = require("./constants");
 const utils_1 = require("./utils");
@@ -126,7 +126,41 @@ const GetRoleByIdUseCase = (repository, role) => __awaiter(void 0, void 0, void 
     }
 });
 exports.GetRoleByIdUseCase = GetRoleByIdUseCase;
-const RemoveUserRoleUseCase = (repository, userId, role) => __awaiter(void 0, void 0, void 0, function* () {
+const AdminRemoveUserRoleUseCase = (repository, adminId, userId, role) => __awaiter(void 0, void 0, void 0, function* () {
+    const admin = yield repository.db.getUserById(adminId);
+    if (admin == undefined) {
+        repository.db.insertLog({
+            usecase: "AdminRemoveUserRoleUseCase",
+            status: entities_1.Status.FAILED,
+            errorCode: 102,
+            description: constants_1.ADMIN_NOT_FOUND,
+            timestamp: (0, utils_1.currentTimestamp)()
+        });
+        return false;
+    }
+    else {
+        const roles = yield repository.db.getUserRoles(adminId);
+        if (!roles.includes(entities_1.Role.Admin)) {
+            repository.db.insertLog({
+                usecase: "AdminRemoveUserRoleUseCase",
+                status: entities_1.Status.FAILED,
+                errorCode: 102,
+                description: constants_1.ROLE_USER_NOT_AUTHORIZED,
+                timestamp: (0, utils_1.currentTimestamp)()
+            });
+            return false;
+        }
+        if (!admin.isActive) {
+            repository.db.insertLog({
+                usecase: "AdminRemoveUserRoleUseCase",
+                status: entities_1.Status.FAILED,
+                errorCode: 102,
+                description: constants_1.ADMIN_SUBSCRIPTION_EXPIRED,
+                timestamp: (0, utils_1.currentTimestamp)()
+            });
+            return false;
+        }
+    }
     const user = yield repository.db.getUserById(userId);
     if (user === undefined) {
         repository.db.insertLog({
@@ -141,7 +175,8 @@ const RemoveUserRoleUseCase = (repository, userId, role) => __awaiter(void 0, vo
     else {
         const userHasRole = yield repository.db.checkUserHasRole(userId, role);
         if (userHasRole) {
-            const removeStatus = yield repository.db.removeUserRole(userId, role);
+            const roleId = yield repository.db.getRoleById(role);
+            const removeStatus = yield repository.db.removeUserRole(userId, roleId);
             if (removeStatus) {
                 repository.db.insertLog({
                     usecase: "RemoveUserRoleUseCase",
@@ -178,7 +213,7 @@ const RemoveUserRoleUseCase = (repository, userId, role) => __awaiter(void 0, vo
         }
     }
 });
-exports.RemoveUserRoleUseCase = RemoveUserRoleUseCase;
+exports.AdminRemoveUserRoleUseCase = AdminRemoveUserRoleUseCase;
 const CheckUserHasRoleUseCase = (repository, userId, role) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield repository.db.getUserById(userId);
     if (user === undefined) {

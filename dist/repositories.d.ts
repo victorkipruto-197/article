@@ -7,7 +7,7 @@ export interface SiteDB {
     insertLog(log: Log): Promise<void>;
     getRoleById(role: Role): Promise<number | undefined>;
     getUserRoles(userId: string): Promise<Role[]>;
-    removeUserRole(userId: string, role: Role): Promise<boolean>;
+    removeUserRole(userId: string, roleId: number): Promise<boolean>;
     checkUserHasRole(userId: string, roles: Role): Promise<boolean>;
 }
 export interface CCache {
