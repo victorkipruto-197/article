@@ -1,5 +1,5 @@
 import { CError, CreateUserForm, Repository, Role, User } from "./entities";
-export declare const AdminCreateUser: (adminId: string, repository: Repository, user: CreateUserForm) => Promise<User | CError>;
+export declare const AdminCreateUserUseCase: (adminId: string, repository: Repository, user: CreateUserForm) => Promise<User | CError>;
 export declare const PopulateDBWithRoles: (repository: Repository) => Promise<boolean>;
 export declare const GetRoleByIdUseCase: (repository: Repository, role: Role) => Promise<number | undefined>;
 export declare const AdminRemoveUserRoleUseCase: (repository: Repository, adminId: string, userId: string, role: Role) => Promise<boolean>;
