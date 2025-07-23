@@ -1,6 +1,6 @@
 {
   "name": "qarticle",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -14,5 +14,8 @@
   "devDependencies": {
     "@types/node": "^24.0.14",
     "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "qarticle": "github:victorkipruto-197/article#release"
   }
 }
