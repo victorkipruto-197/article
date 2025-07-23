@@ -4,7 +4,7 @@ import { ADMIN_SUBSCRIPTION_EXPIRED, ADMIN_NOT_FOUND, EMAIL_SUBJECT_ACCOUNT_CREA
 import { currentTimestamp } from "./utils";
 
 
-export const AdminCreateUser = async (adminId: string, repository: Repository, user: CreateUserForm): Promise<User | CError> => {
+export const AdminCreateUserUseCase = async (adminId: string, repository: Repository, user: CreateUserForm): Promise<User | CError> => {
     /**
      * Here the organization admin sets the workflow for all articles or 
      * can set for specific article. 
@@ -31,7 +31,8 @@ export const AdminCreateUser = async (adminId: string, repository: Repository, u
         }
     }
     else {
-        if (!admin.role.includes(Role.Admin)) {
+        const userRoles = await repository.db.getUserRoles(adminId)
+        if (!userRoles.includes(Role.Admin)) {
             repository.db.insertLog({
                 usecase: "AdminCreateUser",
                 status: Status.FAILED,
