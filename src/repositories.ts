@@ -6,7 +6,9 @@ import { CError, CreateUserForm, Log, Role, User } from "./entities";
 
 export interface SiteDB{
     populateUserRoles():Promise<boolean>
+    populateUserPackages():Promise<boolean>
     createUser(request:CreateUserForm):Promise<User|null>
+    deleteUser(userId:string):Promise<boolean>
     assignRoleToUser(userId:string, role:Role):Promise<boolean>
     getUserById(userId:string):Promise<User|undefined>
     insertLog(log:Log):Promise<void>

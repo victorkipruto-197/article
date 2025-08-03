@@ -1,4 +1,5 @@
 import { CError, CreateUserForm, Repository, Role, User } from "./entities";
+import { Package } from "qarticle";
 export declare const AdminCreateUserUseCase: (adminId: string, repository: Repository, user: CreateUserForm) => Promise<User | CError>;
 export declare const PopulateDBWithRoles: (repository: Repository) => Promise<boolean>;
 export declare const GetRoleByIdUseCase: (repository: Repository, role: Role) => Promise<number | undefined>;
@@ -6,8 +7,8 @@ export declare const AdminRemoveUserRoleUseCase: (repository: Repository, adminI
 export declare const CheckUserHasRoleUseCase: (repository: Repository, userId: string, role: Role) => Promise<boolean>;
 export declare const GetUserRolesUseCase: (repository: Repository, userId: string) => Promise<Role[]>;
 export declare const AdminAssignUserRole: (adminId: string, userId: string, role: Role, repository: Repository) => Promise<boolean>;
-export declare const AdminDeleteUser: (user: User) => void;
-export declare const AdminUpdateUserPackage: (user: User) => void;
+export declare const AdminDeleteUser: (repository: Repository, adminId: string, userId: string) => Promise<boolean>;
+export declare const AdminUpdateUserPackage: (repository: Repository, adminId: string, userId: string, usrPackage: Package) => Promise<boolean>;
 export declare const AdminMakePaymentToSubscription: (user: User) => void;
 export declare const AdminViewAnalytics: (user: User) => void;
 export declare const StaffWriterWritesArticle: (user: User) => void;

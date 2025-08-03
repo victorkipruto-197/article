@@ -1,7 +1,8 @@
 import { CError, CreateUserForm, Repository, Role, Status, User } from "./entities";
 import { ADMIN_SUBSCRIPTION_EXPIRED, ADMIN_NOT_FOUND, EMAIL_SUBJECT_ACCOUNT_CREATED, ADMIN_FAILED_ASSIGN_ROLE, ADMIN_ROLE_ASSIGN_SUCCESS, EMAIL_SUBJECT_ROLE_ASSIGNED, USER_NOT_FOUND, ROLE_USER_NOT_AUTHORIZED } from "./constants"
 
-import { currentTimestamp } from "./utils";
+import { checkIfAdminAndIsActive, currentTimestamp } from "./utils";
+import { Package } from "qarticle";
 
 
 export const AdminCreateUserUseCase = async (adminId: string, repository: Repository, user: CreateUserForm): Promise<User | CError> => {
@@ -337,6 +338,18 @@ export const AdminAssignUserRole = async (adminId: string, userId: string, role:
             const user: User | undefined = await repository.db.getUserById(userId)
 
             if (user != undefined) {
+                const userRoles = await repository.db.getUserRoles(userId)
+                // console.log(role)
+                if (userRoles.includes(role)){
+                    repository.db.insertLog({
+                        usecase:"AdminAssignUserRole",
+                        status:Status.FAILED,
+                        errorCode:102,
+                        description: `User: ${userId} already has a role ${role}`,
+                        timestamp: currentTimestamp()
+                    })
+                    return false;
+                }
                 repository.db.assignRoleToUser(userId, role)
                 repository.db.insertLog({
                     usecase: "AdminAssignUserRole",
@@ -376,17 +389,34 @@ export const AdminAssignUserRole = async (adminId: string, userId: string, role:
     }
 }
 
-export const AdminDeleteUser = (user: User) => {
+export const AdminDeleteUser = async (repository:Repository, adminId:string, userId:string):Promise<boolean> => {
     /**
      * 
      * Removes user
      */
+
+   const adminStatus = await checkIfAdminAndIsActive(repository, adminId)
+   if(!adminStatus) return false 
+    const user = await repository.db.getUserById(userId)
+    if (user === undefined){
+        return false 
+    }
+
+    return repository.db.deleteUser(userId)
+
+
+    
 }
 
-export const AdminUpdateUserPackage = (user: User) => {
+export const AdminUpdateUserPackage = async (repository:Repository, adminId:string, userId:string, usrPackage:Package):Promise<boolean> => {
     /**
      * Updates user package
      */
+
+    const adminStatus = await checkIfAdminAndIsActive(repository, adminId)
+    if(!adminStatus) return false 
+
+    return true
 }
 
 export const AdminMakePaymentToSubscription = (user: User) => {
