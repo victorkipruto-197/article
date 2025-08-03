@@ -321,6 +321,18 @@ const AdminAssignUserRole = (adminId, userId, role, repository) => __awaiter(voi
         else {
             const user = yield repository.db.getUserById(userId);
             if (user != undefined) {
+                const userRoles = yield repository.db.getUserRoles(userId);
+                // console.log(role)
+                if (userRoles.includes(role)) {
+                    repository.db.insertLog({
+                        usecase: "AdminAssignUserRole",
+                        status: entities_1.Status.FAILED,
+                        errorCode: 102,
+                        description: `User: ${userId} already has a role ${role}`,
+                        timestamp: (0, utils_1.currentTimestamp)()
+                    });
+                    return false;
+                }
                 repository.db.assignRoleToUser(userId, role);
                 repository.db.insertLog({
                     usecase: "AdminAssignUserRole",
@@ -356,18 +368,30 @@ const AdminAssignUserRole = (adminId, userId, role, repository) => __awaiter(voi
     }
 });
 exports.AdminAssignUserRole = AdminAssignUserRole;
-const AdminDeleteUser = (user) => {
+const AdminDeleteUser = (repository, adminId, userId) => __awaiter(void 0, void 0, void 0, function* () {
     /**
      *
      * Removes user
      */
-};
+    const adminStatus = yield (0, utils_1.checkIfAdminAndIsActive)(repository, adminId);
+    if (!adminStatus)
+        return false;
+    const user = yield repository.db.getUserById(userId);
+    if (user === undefined) {
+        return false;
+    }
+    return repository.db.deleteUser(userId);
+});
 exports.AdminDeleteUser = AdminDeleteUser;
-const AdminUpdateUserPackage = (user) => {
+const AdminUpdateUserPackage = (repository, adminId, userId, usrPackage) => __awaiter(void 0, void 0, void 0, function* () {
     /**
      * Updates user package
      */
-};
+    const adminStatus = yield (0, utils_1.checkIfAdminAndIsActive)(repository, adminId);
+    if (!adminStatus)
+        return false;
+    return true;
+});
 exports.AdminUpdateUserPackage = AdminUpdateUserPackage;
 const AdminMakePaymentToSubscription = (user) => {
     /**
